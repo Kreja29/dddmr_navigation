@@ -120,10 +120,57 @@ RUN /bin/bash -c "cd /tmp && git clone https://github.com/pytorch/vision.git && 
 RUN python3 -m pip install pycuda==2025.1.2
 RUN python3 -m pip install onnx==1.17.0
 
-# vllm based on torch 2.8 numpy > 2.0
-RUN python3 -m pip install vllm==0.10.2
-RUN python3 -m pip install scipy==1.15.0
-#-----we have deep learning-----
+WORKDIR /usr/local/src 
+# OpenCV
+ARG OPENCV_VERSION=4.11.0
+RUN curl -L -o opencv.zip https://github.com/opencv/opencv/archive/refs/tags/$OPENCV_VERSION.zip\
+    && curl -L -o opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/refs/tags/$OPENCV_VERSION.zip\
+    && unzip opencv.zip && unzip opencv_contrib.zip && cd opencv-$OPENCV_VERSION && mkdir build \
+    && cd .. && rm opencv.zip opencv_contrib.zip
+
+#GSTREAMER/gtk for opencv
+RUN apt-get install -y flex bison meson
+RUN apt-get install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev
+RUN apt install -y libgtk-3-dev
+
+#RUN apt-get install -y libxcb-dri3-dev libx11-xcb-dev
+#RUN /bin/bash -c "cd /tmp && git clone https://github.com/intel/libva.git && cd libva && \
+#            git checkout 25381db75af9ff7bb15eb08b4bda95d09cf669b0 && \
+#            ./autogen.sh --prefix=/lib/aarch64-linux-gnu --libdir=/lib/aarch64-linux-gnu --enable-x11 --enable-wayland --enable-glx --enable-drm && \
+#           make install -j9"   
+#RUN /bin/bash -c "git clone https://gitlab.freedesktop.org/gstreamer/gstreamer.git \
+#                 && cd gstreamer && git checkout 1.20 \
+#                 && meson setup builddir --prefix=/lib/aarch64-linux-gnu \
+#                 && meson compile -C builddir \
+#                 && meson install -C builddir"
+
+# check this for your gpu: https://developer.nvidia.com/cuda-gpus
+ARG CUDA_ARCH=8.7
+WORKDIR opencv-$OPENCV_VERSION/build
+RUN cmake -D CMAKE_BUILD_TYPE=RELEASE \
+    -D CMAKE_INSTALL_PREFIX=/usr/local/opencv$OPENCV_VERSION \
+    -D ENABLE_FAST_MATH=1 \
+    -D CUDA_FAST_MATH=1 \
+    -D WITH_CUBLAS=1 \
+    -D WITH_CUDA=ON \
+    -D BUILD_opencv_cudacodec=OFF \
+    -D WITH_OPENMP=ON \
+    -D WITH_PNG=ON -D WITH_JPEG=ON -D WITH_TIFF=ON -D WITH_WEBP=OFF -D WITH_OPENJPEG=OFF \
+    -D WITH_V4L=OFF -D WITH_JASPER=OFF -D WITH_OPENEXR=OFF -D WITH_FFMPEG=ON -D WITH_GTK=ON \
+    -D WITH_QT=OFF -D WITH_GSTREAMER=ON -D BUILD_opencv_hdf=OFF \
+    -D BUILD_TESTS=OFF -D BUILD_opencv_apps=OFF -D BUILD_PERF_TESTS=OFF \
+    -D BUILD_opencv_python3=ON \
+    -D OPENCV_PYTHON3_INSTALL_PATH=/usr/lib/python3/dist-packages \
+    -D PYTHON_EXECUTABLE=/usr/bin/python3 \
+    -D OPENCV_EXTRA_MODULES_PATH=/usr/local/src/opencv_contrib-$OPENCV_VERSION/modules \
+    -D CUDA_BIN_PATH=/usr/local/cuda\
+    -D CUDA_ARCH_BIN=${CUDA_ARCH}\
+    ..\
+    && make -j$(nproc) && make install
+    
+
+#----->tensorflow for jetson
+RUN python3 -m pip install https://developer.download.nvidia.com/compute/redist/jp/v61/tensorflow/tensorflow-2.16.1+nv24.08-cp310-cp310-linux_aarch64.whl
 
 # rs
 RUN /bin/bash -c "cd /tmp && git clone https://github.com/IntelRealSense/librealsense.git && cd librealsense && git checkout e1688cc318457f7dd57abcdbedd3398062db3009"
