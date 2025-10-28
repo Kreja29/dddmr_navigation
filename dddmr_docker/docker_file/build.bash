@@ -15,7 +15,15 @@ if [[ $image_type == "x64" ]]; then
         echo "----> Creating x64 image with cuda, the x64 image will be created first"
         build_x64
         echo "----> Starting second layer with CUDA"
-        docker build --network host -t dddmr:pytorch2.5.1-cuda12.6-cudnn9-tensorrt10.7 -f Dockerfile_x64_cuda . --no-cache
+        cuda_arch_7=$(nvidia-smi --query-gpu=compute_cap --format=csv | grep '7' | cut -c1)
+        cuda_arch_8=$(nvidia-smi --query-gpu=compute_cap --format=csv | grep '8' | cut -c1)
+        if [[ $cuda_arch_8 == "8" ]]; then 
+            echo "Your GPU ARCH is: $(nvidia-smi --query-gpu=compute_cap --format=csv | grep '8' | cut -d" " -f3)"
+            docker build --network host -t dddmr:pytorch2.5.1-cuda12.6-cudnn9-tensorrt10.7 -f Dockerfile_x64_cuda --build-arg CUDA_ARCH=$(nvidia-smi --query-gpu=compute_cap --format=csv | grep '8' | tr -s ' ' | cut -d" " -f3) .
+        elif [[ $cuda_arch_7 == "7" ]]; then
+            echo "Your GPU ARCH is: $(nvidia-smi --query-gpu=compute_cap --format=csv | grep '7' | cut -d" " -f3)"
+            docker build --network host -t dddmr:pytorch2.5.1-cuda12.6-cudnn9-tensorrt10.7 -f Dockerfile_x64_cuda --build-arg CUDA_ARCH=$(nvidia-smi --query-gpu=compute_cap --format=csv | grep '7' | tr -s ' ' | cut -d" " -f3) .
+        fi
     else
         echo "----> Creating x64 image without cuda"
         build_x64
