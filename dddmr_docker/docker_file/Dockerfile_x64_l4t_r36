@@ -114,9 +114,13 @@ RUN /bin/bash -c  "cd /tmp && apt-get install -y cudss"
 
 #----->torch 2.8 so that it support vllm 0.10 and torch vision
 RUN /bin/bash -c "pip install --ignore-installed sympy==1.14.0"
-RUN /bin/bash -c "cd /tmp && wget https://pypi.jetson-ai-lab.io/jp6/cu126/+f/590/92ab729aee2b8/torch-2.8.0-cp310-cp310-linux_aarch64.whl#sha256=59092ab729aee2b8937d80cc1b35d1128275bd02a7e1bc911e7efa375bd97226 torch-2.8.0-cp310-cp310-linux_aarch64.whl \
-                     && python3 -m pip install --upgrade pip; python3 -m pip install --no-cache torch-2.8.0-cp310-cp310-linux_aarch64.whl"
-RUN /bin/bash -c "cd /tmp && git clone https://github.com/pytorch/vision.git && cd vision && git checkout v0.23.0 && python3 setup.py install"
+#RUN /bin/bash -c "cd /tmp && wget https://pypi.jetson-ai-lab.io/jp6/cu126/+f/590/92ab729aee2b8/torch-2.8.0-cp310-cp310-linux_aarch64.whl torch-2.8.0-cp310-cp310-linux_aarch64.whl \
+#                     && python3 -m pip install --upgrade pip; python3 -m pip install --no-cache torch-2.8.0-cp310-cp310-linux_aarch64.whl"
+#RUN /bin/bash -c "cd /tmp && git clone https://github.com/pytorch/vision.git && cd vision && git checkout v0.23.0 && python3 setup.py install"
+#see: https://forums.developer.nvidia.com/t/help-me-with-correct-pytorch-and-torchvision-versions-requirement-for-jetpack-6-2-1-orin-super/343688/37
+RUN /bin/bash -c "pip3 install --force-reinstall torch --index-url https://pypi.jetson-ai-lab.io/jp6/cu126"
+RUN /bin/bash -c "pip3 install --force-reinstall torchaudio --index-url https://pypi.jetson-ai-lab.io/jp6/cu126"
+RUN /bin/bash -c "pip3 install --force-reinstall torchvision --index-url https://pypi.jetson-ai-lab.io/jp6/cu126"
 RUN python3 -m pip install pycuda==2025.1.2
 RUN python3 -m pip install onnx==1.17.0
 
