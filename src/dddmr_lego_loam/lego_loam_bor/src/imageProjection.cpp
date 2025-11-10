@@ -369,7 +369,7 @@ void ImageProjection::projectPointCloud() {
     float verticalAngle = std::asin(thisPoint.z / range);
         //std::atan2(thisPoint.z, sqrt(thisPoint.x * thisPoint.x + thisPoint.y * thisPoint.y));
 
-    int rowIdn = (verticalAngle + _ang_bottom) / _ang_resolution_Y;
+    int rowIdn = (verticalAngle + _ang_bottom + _sensor_mount_angle) / _ang_resolution_Y;
     if (rowIdn < 0 || rowIdn >= _vertical_scans) {
       continue;
     }
@@ -501,7 +501,7 @@ void ImageProjection::groundRemoval() {
 
       // TODO: review this change
 
-      if ( (vertical_angle + _sensor_mount_angle) <= 10 * DEG_TO_RAD) {
+      if ( (vertical_angle) <= 10 * DEG_TO_RAD) {
         _ground_mat(i, j) = 1;
         _ground_mat(i + 1, j) = 1;
         //x = _full_cloud->points[lowerInd].x + dX*t
