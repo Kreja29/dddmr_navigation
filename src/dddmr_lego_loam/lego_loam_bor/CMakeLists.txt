@@ -34,6 +34,7 @@ find_package(PCL 1.15 REQUIRED QUIET)
 find_package(OpenCV REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(image_geometry REQUIRED)
+find_package(dddmr_trt REQUIRED)
 
 set(dependencies
   rclcpp
@@ -254,13 +255,19 @@ if(NOT TRT_ENABLED)
 endif()
 
 if(TRT_ENABLED)
-  message(STATUS "TensorRT is enabled. Compiling TensorRT and Yolo")
-  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "cmake")
-  add_subdirectory(src/yolo/yolo_trt/tensorrt-cpp-api)
+  
+  find_package(CUDAToolkit REQUIRED)
 
-  add_library(YoloV8_TRT SHARED src/yolo/yolo_trt/yolov8.cpp)
-  target_link_libraries(YoloV8_TRT PUBLIC tensorrt_cpp_api ${OpenCV_LIBRARIES})
-  target_include_directories(YoloV8_TRT PUBLIC src/yolo/yolo_trt/tensorrt-cpp-api/src)
+  message(STATUS "TensorRT is enabled. Compiling TRT and YOLO features")
+  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "cmake")
+
+  include_directories(
+    include
+    ${PCL_INCLUDE_DIRS}
+    ${GTSAM_INCLUDE_DIRS}
+    ${OpenCV_INCLUDE_DIRS}
+    ${dddmr_trt_INCLUDE_DIRS}
+  )
 
   #yolo ros2 test node
   add_executable(yolo_ros2_image_sub
@@ -268,7 +275,11 @@ if(TRT_ENABLED)
   )
   target_link_libraries(yolo_ros2_image_sub 
     ${OpenCV_LIBRARIES}
-    YoloV8_TRT
+    ${dddmr_trt_LIBRARIES}
+    CUDA::cudart
+  )
+  target_include_directories(yolo_ros2_image_sub 
+    PRIVATE ${CUDAToolkit_INCLUDE_DIRS}
   )
   ament_target_dependencies(yolo_ros2_image_sub
     ${dependencies}
@@ -278,10 +289,15 @@ if(TRT_ENABLED)
   add_library(yolo_image_projection SHARED
     src/yolo/yoloImageProjection.cpp
   )
+  
   target_link_libraries(yolo_image_projection
     ${PCL_LIBRARIES}
     ${OpenCV_LIBRARIES}
-    YoloV8_TRT
+    ${dddmr_trt_LIBRARIES}
+    CUDA::cudart
+  )
+  target_include_directories(yolo_ros2_image_sub 
+    PRIVATE ${CUDAToolkit_INCLUDE_DIRS}
   )
   ament_target_dependencies(yolo_image_projection
     ${dependencies}
@@ -297,14 +313,17 @@ if(TRT_ENABLED)
     feature_association
     map_optimization
     gtsam
-    YoloV8_TRT
+    ${dddmr_trt_LIBRARIES}
+    CUDA::cudart
+  )
+  target_include_directories(yolo_ros2_image_sub 
+    PRIVATE ${CUDAToolkit_INCLUDE_DIRS}
   )
   ament_target_dependencies(lego_loam_yolo_bag
     ${dependencies}
   )
 
   install(TARGETS
-    YoloV8_TRT
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
@@ -317,7 +336,6 @@ if(TRT_ENABLED)
     RUNTIME DESTINATION lib/${PROJECT_NAME}
   )
 
-  ament_export_libraries(YoloV8_TRT)
   # --- Everything CUDA finish here ---
 
 else()

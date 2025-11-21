@@ -22,7 +22,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 
-#include "yolov8.h"
+#include "dddmr_trt/yolov8.h"
 #include <opencv2/cudaimgproc.hpp>
 
 class YoloImageProjection : public rclcpp::Node 

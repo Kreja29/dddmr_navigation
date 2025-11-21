@@ -359,11 +359,14 @@ void MultiLayerSpinningLidar::selfMark(){
       cloud_cluster->points.push_back(i_pt); 
       cloud_clusters->points.push_back(i_pt);
 
-    } 
-    intensity_cnt += 100;
+    }
     centroid.x/=it->indices.size();
     centroid.y/=it->indices.size();
     centroid.z/=it->indices.size();
+    centroid.intensity = intensity_cnt;
+    cloud_clusters->points.push_back(centroid);   
+    intensity_cnt += 100;
+ 
 
     //@ Sometimes the lidar accidently add ground scan (due to lego loam did not segment them correctly)
     //@ Therefore we implement following temporal solution -> when cluster center attaches ground, ignore it!
@@ -426,6 +429,13 @@ void MultiLayerSpinningLidar::selfMark(){
       voxelized_centroid.x = int(centroid.x/resolution_) * resolution_;
       voxelized_centroid.y = int(centroid.y/resolution_) * resolution_;
       voxelized_centroid.z = int(centroid.z/height_resolution_) * height_resolution_;
+
+      //@ push_back centroid since it is used to represent the cluster
+      pcl::PointXYZ pt_centroid;
+      pt_centroid.x = centroid.x; pt_centroid.y = centroid.y; pt_centroid.z = centroid.z;
+      pcl_msg_gbl_->push_back(pt_centroid);
+      cloud_cluster->push_back(centroid);
+
       if(isinLidarObservation(voxelized_centroid))
           pct_marking_->addPCPtr(centroid.x, centroid.y, centroid.z, cloud_cluster, coefficients);
 
@@ -505,7 +515,7 @@ void MultiLayerSpinningLidar::selfClear(){
   if(it_x_min==pct_marking_->getEnd() && it_x_min==it_x_max)
     return;
 
-  
+  size_t cleared_cnt = 0;
   for(auto it_x = it_x_min; it_x!=it_x_max; it_x++){
 
     auto it_y_min = (*it_x).second.lower_bound(round_robot_base_y_min);
@@ -530,9 +540,14 @@ void MultiLayerSpinningLidar::selfClear(){
         }
         
         pcl::PointXYZ pt;
+        /* Restoring the pt is not accurate due to the rounding, we get it from last point in pt, which is pushed when added
         pt.x = (*it_x).first*resolution_;
         pt.y = (*it_y).first*resolution_;
         pt.z = (*it_z).first*height_resolution_;
+        */
+        pt.x = (*it_z).second.pc_->back().x;
+        pt.y = (*it_z).second.pc_->back().y;
+        pt.z = (*it_z).second.pc_->back().z;
         pcl::PointCloud<pcl::PointXYZI> casting_check;
 
         if(!isinLidarObservation(pt)){
@@ -543,7 +558,6 @@ void MultiLayerSpinningLidar::selfClear(){
           a_voxel.z = (*it_z).first;
           current_observation_ptr.push_back(a_voxel);
           *pc_current_window_ += (*(*it_z).second.pc_);
-          addCastingMarker(pt, current_observation_ptr.size(), markerArray);
           continue;
         }
         else{
@@ -554,17 +568,51 @@ void MultiLayerSpinningLidar::selfClear(){
             getCastingPointCloud(pt, casting_check);
             //@ we loop this "line" and do radius search to see if there is any obstacle, if there is an obstacle, it means this line is blocked, so ray trace fail
             for(auto a_pt=casting_check.points.begin(); a_pt!=casting_check.points.end(); a_pt++){
-              
+              /*
+              //@ index 0 is cluster center
+              //@ Check center around to rule out one stand for all (huge segmentation)
+              if(a_pt==casting_check.points.begin()){
+                //@ find nearest ostacle and then check whether this obstacle belongs to itself
+                std::vector<int> pointIdxNKNSearch(1);
+                std::vector<float> pointNKNSquaredDistance(1);
+                pcl::PointXYZ pt_i;
+                pt_i.x = (*a_pt).x;
+                pt_i.y = (*a_pt).y;
+                pt_i.z = (*a_pt).z;
+                if(kdtree_last_observation->nearestKSearch(pt_i, 1, pointIdxNKNSearch, pointNKNSquaredDistance)>0){
+                  pcl::PointXYZI candidate_pt;
+                  candidate_pt.x = pcl_msg_gbl_->points[pointIdxNKNSearch.front()].x;
+                  candidate_pt.y = pcl_msg_gbl_->points[pointIdxNKNSearch.front()].y;
+                  candidate_pt.z = pcl_msg_gbl_->points[pointIdxNKNSearch.front()].z;
+                  if((*it_z).second.pc_->points.size()>4){
+                    pcl::KdTreeFLANN<pcl::PointXYZI>::Ptr kdtree_cluster(new pcl::KdTreeFLANN<pcl::PointXYZI>());
+                    kdtree_cluster->setInputCloud((*it_z).second.pc_);
+                    std::vector<int> id;
+                    std::vector<float> sqdist;
+                    if(kdtree_cluster->radiusSearch(candidate_pt, 0.5, id, sqdist)>0){
+                      //@ ray hits obstacle, we skip clearing this segmentation
+                      skip_clear_this_segmentation = true;
+                      break;
+                    }
+                  }
+                }
+              }
+              */
               //@ when casting back for last 5 cm, ignore it, because dirty lidar may cause casting fail
               if((*a_pt).intensity<0.05)
                 break;
+              if((*a_pt).intensity>perception_window_size_){
+                skip_clear_this_segmentation = true;
+                break;
+              }
               //@ Create a point for kd-tree
               pcl::PointXYZ pt_i;
               pt_i.x = (*a_pt).x;
               pt_i.y = (*a_pt).y;
               pt_i.z = (*a_pt).z;
-              double search_distance =  (*a_pt).intensity/20. + 0.01; //@ decrease spot size, ex: at 1.0 meter look for 5 cm;
-              search_distance = std::min(search_distance, 0.05);
+              //double search_distance =  (*a_pt).intensity/20. + 0.01; //@ decrease spot size, ex: at 1.0 meter look for 5 cm;
+              //search_distance = std::min(search_distance, 0.1);
+              double search_distance = std::max(resolution_, height_resolution_);
               std::vector<int> id;
               std::vector<float> sqdist;
               if(kdtree_last_observation->radiusSearch(pt_i, search_distance, id, sqdist)>0){
@@ -583,7 +631,7 @@ void MultiLayerSpinningLidar::selfClear(){
             a_voxel.z = (*it_z).first;
             current_observation_ptr.push_back(a_voxel);
             *pc_current_window_ += (*(*it_z).second.pc_);
-            addCastingMarker(pt, current_observation_ptr.size(), markerArray);
+            //addCastingMarker(pt, current_observation_ptr.size(), markerArray);
             continue;
           }
           
@@ -599,10 +647,12 @@ void MultiLayerSpinningLidar::selfClear(){
             a_voxel.y = (*it_y).first;
             a_voxel.z = (*it_z).first;
             current_observation_ptr.push_back(a_voxel);
-            addCastingMarker(pt, current_observation_ptr.size(), markerArray);
+            //addCastingMarker(pt, current_observation_ptr.size(), markerArray);
           }       
           else{
+            addCastingMarker(pt, cleared_cnt, markerArray);
             pct_marking_->removePCPtr((*it_z).second);
+            cleared_cnt++;
           } 
                  
         }
@@ -656,6 +706,14 @@ void MultiLayerSpinningLidar::getCastingPointCloud(pcl::PointXYZ& cluster_center
     pc_for_check.push_back(a_pt); 
   }
   
+  //@ Generate t=1.0
+  pcl::PointXYZI a_pt;
+  a_pt.intensity = 0.0;
+  a_pt.x = cluster_center.x + dX;
+  a_pt.y = cluster_center.y + dY;
+  a_pt.z = cluster_center.z + dZ;
+  a_pt.intensity = getDistanceBTWPoints(a_pt_s, a_pt);  
+  pc_for_check.push_back(a_pt); 
   /*
   double l = cluster_center.x - trans_gbl2s_af3_.translation().x();
   double m = cluster_center.y - trans_gbl2s_af3_.translation().y();
