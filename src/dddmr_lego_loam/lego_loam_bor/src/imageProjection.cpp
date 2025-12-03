@@ -241,12 +241,12 @@ bool ImageProjection::allEssentialTFReady(std::string sensor_frame){
       tf2_trans_b2s_.setOrigin(tf2::Vector3(trans_b2s_.transform.translation.x, trans_b2s_.transform.translation.y, trans_b2s_.transform.translation.z));
       
       tf2::Matrix3x3 m(tf2_trans_b2s_.getRotation());
-      double roll, pitch, yaw;
-      m.getRPY(roll, _sensor_mount_angle, yaw);
+      double roll;
+      m.getRPY(roll, _sensor_mount_angle, _sensor_yaw_angle);
       
       //@ we got pitch, remove pitch in the tf
       tf2::Quaternion zero_pitch;
-      zero_pitch.setRPY(0, 0, yaw);
+      zero_pitch.setRPY(0, 0, _sensor_yaw_angle);
       tf2_trans_b2s_.setRotation(zero_pitch);
       trans_b2s_.transform.rotation.x = tf2_trans_b2s_.getRotation().x();
       trans_b2s_.transform.rotation.y = tf2_trans_b2s_.getRotation().y();
@@ -394,8 +394,8 @@ void ImageProjection::projectPointCloud() {
       continue;
     }
 
-    float horizonAngle = std::atan2(thisPoint.x, thisPoint.y);
-    
+    float horizonAngle = std::atan2(thisPoint.x, thisPoint.y) + _sensor_yaw_angle;
+
     //if(horizonAngle>=0.7854 && horizonAngle<=1.57+0.7854 && range<6.0){
     //  continue;
     //}

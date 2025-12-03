@@ -87,6 +87,7 @@ class ImageProjection : public rclcpp::Node
     int _segment_valid_line_num;
     int _ground_scan_index;
     double _sensor_mount_angle;
+    double _sensor_yaw_angle;
     std::string odom_type_;
     std::string baselink_frame_, sensor_frame_;
 
