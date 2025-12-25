@@ -146,7 +146,13 @@ ImageProjection::ImageProjection(std::string name, Channel<ProjectionOut>& outpu
   this->declare_parameter("imageProjection.trt_model_path", rclcpp::ParameterValue(""));
   this->get_parameter("imageProjection.trt_model_path", trt_model_path_);
   RCLCPP_INFO(this->get_logger(), "imageProjection.trt_model_path: %s" , trt_model_path_.c_str());
-  
+
+  this->declare_parameter("imageProjection.projected_image_stack_size", rclcpp::ParameterValue(0));
+  this->get_parameter("imageProjection.projected_image_stack_size", projected_image_stack_size_);
+  RCLCPP_INFO(this->get_logger(), "imageProjection.projected_image_stack_size: %d" , projected_image_stack_size_);
+  if(projected_image_stack_size_<1){
+    projected_image_stack_size_ = 1;
+  }
   std::string filename = "my_file.txt"; // Replace with your file name
 
   if (std::filesystem::exists(trt_model_path_)) {
@@ -371,7 +377,8 @@ void ImageProjection::projectPointCloud() {
   //cv image
   range_mat_removing_moving_object_ = cv::Mat::zeros(_vertical_scans, _horizontal_scans, CV_8UC3); 
   cv::Mat projected_image(_vertical_scans, _horizontal_scans, CV_8UC3, cv::Scalar(0,0,0));
-  
+  cv::Mat projected_stack_result;
+
   // range image projection
   const size_t cloudSize = _laser_cloud_in->points.size();
 
@@ -429,9 +436,8 @@ void ImageProjection::projectPointCloud() {
       projected_image.at<cv::Vec3b>(_vertical_scans-rowIdn, viscolumnIdn)[0] = high_byte;
       projected_image.at<cv::Vec3b>(_vertical_scans-rowIdn, viscolumnIdn)[1] = low_byte;
       projected_image.at<cv::Vec3b>(_vertical_scans-rowIdn, viscolumnIdn)[2] = 0;
-
-    }
       
+    }
 
     thisPoint.intensity = (float)rowIdn + (float)viscolumnIdn / 10000.0;
     size_t index = viscolumnIdn + rowIdn * _horizontal_scans;
@@ -441,10 +447,26 @@ void ImageProjection::projectPointCloud() {
     _full_info_cloud->points[index].intensity = range;
   }
   
+  //@ queue projected image
+  if(projected_image_queue_.size()<projected_image_stack_size_){
+    projected_image_queue_.push_back(projected_image);
+  }
+  else{
+    projected_image_queue_.push_back(projected_image);
+    projected_image_queue_.pop_front();
+  }
+
+  //@ stack all projected image to get time elapse
+  projected_stack_result = projected_image_queue_.front();
+  for(auto it=projected_image_queue_.begin()+1; it!=projected_image_queue_.end(); it++){
+    cv::vconcat(projected_stack_result, (*it), projected_stack_result);
+  }
+
+
 #ifdef TRT_ENABLED
   
-  if(to_fa_ && is_trt_engine_exist_){ //to_fa means we are not exporting depth image, so skip inference to save time 
-  cv::Mat inferenced_image = projected_image;
+  if(to_fa_ && is_trt_engine_exist_ && projected_image_queue_.size()==projected_image_stack_size_){ //to_fa means we are not exporting depth image, so skip inference to save time 
+  cv::Mat inferenced_image = projected_stack_result;
   // Run inference
   const auto objects = yolov8_->detectObjects(inferenced_image);
 
@@ -466,9 +488,19 @@ void ImageProjection::projectPointCloud() {
   cv::Mat inverted_mask;
   cv::bitwise_not(full_sized_mask, inverted_mask);
   cv::bitwise_and(inferenced_image, inferenced_image, range_mat_removing_moving_object_, inverted_mask);
-
+  
+  
+  //@ cut final inferenced image
+  int x_start = 0;
+  int y_start = inferenced_image.rows - inferenced_image.rows/projected_image_stack_size_;
+  int crop_width = inferenced_image.cols;
+  int crop_height = inferenced_image.rows/projected_image_stack_size_;
+  cv::Rect myROI(x_start, y_start, crop_width, crop_height);
+  cv::Mat last_row_of_projected_image = inferenced_image(myROI);//@inferenced image is sizeof(projected_image_stack_size_ by 1)
+  range_mat_removing_moving_object_ = range_mat_removing_moving_object_(myROI);
+  
   cv_bridge::CvImage img_annotated;
-  img_annotated.image = inferenced_image;
+  img_annotated.image = last_row_of_projected_image;
   img_annotated.encoding = sensor_msgs::image_encodings::TYPE_8UC3;
   sensor_msgs::msg::Image::SharedPtr ros2_annotated_img = img_annotated.toImageMsg();
   pub_annotated_img_->publish(*ros2_annotated_img);
@@ -476,7 +508,7 @@ void ImageProjection::projectPointCloud() {
 #endif
 
   cv_bridge::CvImage img_bridge;
-  img_bridge.image = projected_image;
+  img_bridge.image = projected_stack_result;
   img_bridge.encoding = sensor_msgs::image_encodings::TYPE_8UC3;
   sensor_msgs::msg::Image::SharedPtr msg = img_bridge.toImageMsg();
   _pub_projected_image->publish(*msg);
@@ -489,9 +521,12 @@ void ImageProjection::projectPointCloud() {
     std::stringstream ss;
     ss << _seg_msg.header.stamp.sec << "_" << std::setw(9) << std::setfill('0') << _seg_msg.header.stamp.nanosec;
     timestamp = ss.str();
-    std::string spec = std::to_string(_vertical_scans)+"x"+std::to_string(_horizontal_scans)+"_st"+std::to_string(stitcher_num_);
+    std::string spec = 
+      std::to_string(_vertical_scans)+"x"+std::to_string(_horizontal_scans) \
+      +"_stitch"+std::to_string(stitcher_num_) \
+      +"_vstack"+std::to_string(projected_image_stack_size_);
     std::string file_name = mapping_dir_string_ + "/" + timestamp + "_" + spec + ".png";
-    cv::imwrite(file_name, projected_image);
+    cv::imwrite(file_name, projected_stack_result);
     last_save_depth_img_time_ = imge_time;
   }
 

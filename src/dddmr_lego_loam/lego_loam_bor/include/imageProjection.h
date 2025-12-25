@@ -136,6 +136,9 @@ class ImageProjection : public rclcpp::Node
     
     bool is_trt_engine_exist_;
     std::string trt_model_path_;
+    int projected_image_stack_size_;
+    std::deque<cv::Mat> projected_image_queue_;
+
 #ifdef TRT_ENABLED
     std::shared_ptr<YoloV8> yolov8_;
 #endif

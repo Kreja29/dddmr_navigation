@@ -1,8 +1,8 @@
 bag_reader:
   ros__parameters:
     use_sim_time: true
-    bag_file_dir: "/root/dddmr_bags/stair_livox360"
-    point_cloud_topic: "/velodyne_points"
+    bag_file_dir: "/root/dddmr_bags/emirates_airy"
+    point_cloud_topic: "/rslidar_points"
     odometry_topic: "/odom"
     skip_frame: 1
 
@@ -12,12 +12,12 @@ lego_loam_ip:
     # leishen16
     laser:
         odom_type: "laser_odometry"         #wheel_odometry/laser_odometry 
-        baselink_frame: "base_link"
-        num_vertical_scans: 32
-        num_horizontal_scans: 640
-        ground_scan_index: 4
-        vertical_angle_bottom: -7.0          # degrees
-        vertical_angle_top: 52.0            # degrees
+        baselink_frame: "directdrive_base_link"
+        num_vertical_scans: 100
+        num_horizontal_scans: 400
+        ground_scan_index: 50
+        vertical_angle_bottom: -90.0          # degrees
+        vertical_angle_top: 90.0            # degrees
         scan_period: 0.1                   # seconds
 
     imageProjection:
@@ -28,7 +28,8 @@ lego_loam_ip:
         maximum_detection_range: 100.0            # point cloud within this range will be used to project image
         distance_for_patch_between_rings: 1.0    # patch ground between rings within this range, i.e. ring0 and ring1 is smaller than 1 meter, patch them
         time_step_between_depth_image: 0.2
-        stitcher_num: 5
+        stitcher_num: 0
+        projected_image_stack_size: 4
         to_fa: false
 
 lego_loam_fa:
