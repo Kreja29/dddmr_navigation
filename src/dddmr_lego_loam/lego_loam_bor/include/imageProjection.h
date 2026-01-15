@@ -59,7 +59,6 @@ class ImageProjection : public rclcpp::Node
     void labelComponents(int row, int col);
     void publishClouds();
     bool allEssentialTFReady(std::string sensor_frame);
-    void getNoPitchPoint(PointType& pt_in, PointType& pt_out);
     
     pcl::PointCloud<PointType>::Ptr _laser_cloud_in;
 
@@ -139,6 +138,13 @@ class ImageProjection : public rclcpp::Node
     std::deque<cv::Mat> projected_image_queue_;
     
     double sensor_install_pitch_;
+    double ground_fov_bottom_;
+    double ground_fov_top_;
+    double ground_positive_start_;
+    double ground_positive_stop_;
+    double ground_negative_start_;
+    double ground_negative_stop_;
+
 #ifdef TRT_ENABLED
     std::shared_ptr<YoloV8> yolov8_;
 #endif
