@@ -538,7 +538,36 @@ void ImageProjection::findStartEndAngle() {
       _seg_msg.end_orientation - _seg_msg.start_orientation;
 }
 
+void ImageProjection::getNoPitchPoint(PointType& pt_in, PointType& pt_out){
+  //@ remove pitch to robot frame
+  //_full_cloud->points[lowerInd]
+  geometry_msgs::msg::TransformStamped trans_lidar2horizontal;
+  tf2::Quaternion q;
+  q.setRPY( 0, sensor_install_pitch_, 0);
+  trans_lidar2horizontal.transform.rotation.x = q.x(); trans_lidar2horizontal.transform.rotation.y = q.y();
+  trans_lidar2horizontal.transform.rotation.z = q.z(); trans_lidar2horizontal.transform.rotation.w = q.w();
+  Eigen::Affine3d trans_lidar2horizontal_af3 = tf2::transformToEigen(trans_lidar2horizontal);
+
+  pcl::PointCloud<PointType> temp_pc;
+  temp_pc.push_back(pt_in);
+  pcl::transformPointCloud(temp_pc, temp_pc, trans_lidar2horizontal_af3);
+  pt_out = temp_pc.points[0];
+}
+
 void ImageProjection::zPitchRollFeatureRemoval() {
+
+
+
+  geometry_msgs::msg::TransformStamped trans_lidar2horizontal;
+  tf2::Quaternion q;
+  q.setRPY( 0, sensor_install_pitch_, 0);
+  trans_lidar2horizontal.transform.rotation.x = q.x(); trans_lidar2horizontal.transform.rotation.y = q.y();
+  trans_lidar2horizontal.transform.rotation.z = q.z(); trans_lidar2horizontal.transform.rotation.w = q.w();
+  Eigen::Affine3d trans_lidar2horizontal_af3 = tf2::transformToEigen(trans_lidar2horizontal);
+
+  pcl::PointCloud<PointType> _full_cloud_no_pitch;
+  pcl::transformPointCloud(*_full_cloud, _full_cloud_no_pitch, trans_lidar2horizontal_af3);
+
   // _ground_mat
   // -1, no valid info to check if ground of not
   //  0, initial value, after validation, means not ground
@@ -595,7 +624,7 @@ void ImageProjection::zPitchRollFeatureRemoval() {
         _label_mat(i+1, j) = -1;
       
 #ifdef TRT_ENABLED
-        // TRT object detection to remove thins we dont want to use for SLAM, such as moving object
+        // TRT object detection to remove things we dont want to use for SLAM, such as moving object
         if(is_trt_engine_exist_ && projected_image_queue_.size()==projected_image_stack_size_){
           // it was generated as _range_mat(rowIdn, viscolumnIdn) = range;
           cv::Vec3b pixel = range_mat_removing_moving_object_.at<cv::Vec3b>(_vertical_scans-i, j);
@@ -609,6 +638,7 @@ void ImageProjection::zPitchRollFeatureRemoval() {
 
       //@ 1. check upper and lower are in ground FOV
       //@ 2. check two point slope is less than some reasonable value
+
       bool in_ground_fov = false;
       
       double current_i_angle = i * _ang_resolution_Y - _ang_bottom; //_ang_bottom has beedn changed sign at begining
@@ -631,7 +661,56 @@ void ImageProjection::zPitchRollFeatureRemoval() {
       }
 
       if(in_ground_fov){
+
+        PointType lowerInd_pt_no_pitch;
+        PointType lowerInd_left_pt_no_pitch;
+        PointType lowerInd_right_pt_no_pitch;
+        bool valid_point = false;
+
+        if(j<10){
+          continue;
+          getNoPitchPoint(_full_cloud->points[lowerInd], lowerInd_pt_no_pitch);
+          getNoPitchPoint(_full_cloud->points[lowerInd+_horizontal_scans-1], lowerInd_left_pt_no_pitch);
+          getNoPitchPoint(_full_cloud->points[lowerInd+1], lowerInd_right_pt_no_pitch);
+        }
+
+        else if(j>_horizontal_scans-11){
+          continue;
+          getNoPitchPoint(_full_cloud->points[lowerInd], lowerInd_pt_no_pitch);
+          getNoPitchPoint(_full_cloud->points[lowerInd-1], lowerInd_left_pt_no_pitch);
+          getNoPitchPoint(_full_cloud->points[lowerInd], lowerInd_right_pt_no_pitch);
+        }
+        else{
+          //getNoPitchPoint(_full_cloud->points[lowerInd], lowerInd_pt_no_pitch);
+          lowerInd_pt_no_pitch = _full_cloud_no_pitch[lowerInd];
+          for(int jj=1;jj<10;jj++){
+            //getNoPitchPoint(_full_cloud->points[lowerInd-jj], lowerInd_left_pt_no_pitch);
+            lowerInd_left_pt_no_pitch = _full_cloud_no_pitch[lowerInd-jj];
+            if(fabs(lowerInd_pt_no_pitch.y - lowerInd_left_pt_no_pitch.y)>0.05){
+              valid_point = true;
+              break;
+            }
+              
+          }
+          for(int jj=1;jj<10;jj++){
+            //getNoPitchPoint(_full_cloud->points[lowerInd+jj], lowerInd_right_pt_no_pitch);
+            lowerInd_right_pt_no_pitch = _full_cloud_no_pitch[lowerInd+jj];
+            if(fabs(lowerInd_pt_no_pitch.y - lowerInd_right_pt_no_pitch.y)>0.05){
+              valid_point = true;
+              break;
+            }
+              
+          }
+        }
         
+        double dz_left = fabs(lowerInd_pt_no_pitch.z - lowerInd_left_pt_no_pitch.z);
+        double dz_right = fabs(lowerInd_pt_no_pitch.z - lowerInd_right_pt_no_pitch.z);
+        
+        if(!valid_point || fabs(dz_left-dz_right)>0.03){
+          do_patch = false;
+          continue;
+        }
+
         if(i<closest_ring_edge) //we dont casting the last one
           closest_ring_edge = i;
 
@@ -644,6 +723,7 @@ void ImageProjection::zPitchRollFeatureRemoval() {
 
         float vertical_angle = std::atan2(dZg , sqrt(dXg * dXg + dYg * dYg));
         if ( fabs(vertical_angle - sensor_install_pitch_) > ground_slope_tolerance_) {
+          do_patch = false;
           continue;
         }
         float ds = sqrt(dX*dX + dY*dY + dZ*dZ);
@@ -759,6 +839,7 @@ void ImageProjection::cloudSegmentation() {
   }
 
   // extract segmented cloud for visualization
+  /*
   for (size_t i = 0; i < _vertical_scans; ++i) {
     for (size_t j = 0; j < _horizontal_scans; ++j) {
       if (_label_mat(i, j) > 0 && _label_mat(i, j) != 999999) {
@@ -769,6 +850,7 @@ void ImageProjection::cloudSegmentation() {
       }
     }
   }
+  */
 }
 
 void ImageProjection::labelComponents(int row, int col) {

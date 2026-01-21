@@ -59,6 +59,7 @@ class ImageProjection : public rclcpp::Node
     void labelComponents(int row, int col);
     void publishClouds();
     bool allEssentialTFReady(std::string sensor_frame);
+    void getNoPitchPoint(PointType& pt_in, PointType& pt_out);
     
     pcl::PointCloud<PointType>::Ptr _laser_cloud_in;
 
