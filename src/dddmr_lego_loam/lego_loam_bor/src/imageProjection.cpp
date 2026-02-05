@@ -617,7 +617,7 @@ void ImageProjection::zPitchRollFeatureRemoval() {
     size_t ring_edge = 0;
     size_t closest_ring_edge = _vertical_scans-1;
     bool do_patch = false;
-    for (size_t i = 0; i < _vertical_scans; ++i) {
+    for (size_t i = 0; i < _vertical_scans-1; ++i) {
 
       if(_range_mat(i,j)==FLT_MAX){
         _label_mat(i, j) = -1;

@@ -655,7 +655,8 @@ void FeatureAssociation::findCorrespondingCornerFeatures(int iterCount) {
   for (int i = 0; i < cornerPointsSharpNum; i++) {
     PointType pointSel;
     TransformToStart(&cornerPointsSharp->points[i], &pointSel);
-
+    if(!pcl::isFinite(pointSel))
+      continue;
     if (iterCount % 5 == 0) {
       kdtreeCornerLast.nearestKSearch(pointSel, 1, pointSearchInd,
                                        pointSearchSqDis);

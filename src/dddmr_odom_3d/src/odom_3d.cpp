@@ -131,6 +131,10 @@ void GenericDriveOdom::cbImu(const sensor_msgs::msg::Imu::SharedPtr msg)
 void GenericDriveOdom::cbOdom2D(const nav_msgs::msg::Odometry::SharedPtr msg)
 {
   latest_odom_2d_ = *msg;
+  if(fabs(latest_odom_2d_.twist.twist.linear.x)<0.1)
+    latest_odom_2d_.twist.twist.linear.x = 0.0;
+  if(fabs(latest_odom_2d_.twist.twist.linear.y)<0.1)
+    latest_odom_2d_.twist.twist.linear.y = 0.0; 
 }
 
 int main(int argc, char** argv) 
