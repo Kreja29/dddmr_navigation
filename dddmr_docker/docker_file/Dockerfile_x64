@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
@@ -7,7 +7,7 @@ RUN apt-get update
 RUN apt-get install -y apt-utils && apt-get install -y curl gnupg2 && apt-get install -y lsb-release && apt-get clean all
 
 
-# --- ROS2 Humble Installation
+# --- ROS2 Jazzy Installation
 RUN locale  # check for UTF-8
 
 RUN apt update && apt install -y locales
@@ -26,8 +26,8 @@ RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/r
 
 RUN apt-get update && apt-get install -y git
 
-RUN apt install -y ros-humble-desktop
-# --- Humble has been installed
+RUN apt install -y ros-jazzy-desktop
+# --- Jazzy has been installed
 
 
 #install some tool
@@ -40,20 +40,20 @@ RUN apt-get install -y iputils-ping net-tools htop build-essential
 RUN apt install -y zip
 RUN apt install -y libmetis-dev
 RUN cd /tmp && git clone https://github.com/borglab/gtsam.git && cd gtsam && git checkout 4.2a9
-RUN cd /tmp/gtsam && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DGTSAM_USE_SYSTEM_EIGEN=ON -DGTSAM_USE_SYSTEM_METIS=ON -DPCL_ENABLE_MARCHNATIVE=OFF .. && make install -j$(nproc)
+RUN cd /tmp/gtsam && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DGTSAM_USE_SYSTEM_EIGEN=ON -DGTSAM_USE_SYSTEM_METIS=ON -DPCL_ENABLE_MARCHNATIVE=OFF .. && make install -j4
 # --- end of gtsam
 
 
-# --- PCL --- 
+# --- PCL ---
 RUN apt install -y libpcap-dev
 RUN apt install -y libusb-1.0-0-dev
 RUN cd /tmp && git clone https://github.com/PointCloudLibrary/pcl.git && cd pcl && git checkout pcl-1.15.0
-RUN cd /tmp/pcl && mkdir build && cd build && cmake -DPCL_ENABLE_AVX=OFF -DPCL_ENABLE_SSE=OFF -DPCL_ENABLE_MARCHNATIVE=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr .. && make install -j$(nproc)
+RUN cd /tmp/pcl && mkdir build && cd build && cmake -DPCL_ENABLE_AVX=OFF -DPCL_ENABLE_SSE=OFF -DPCL_ENABLE_MARCHNATIVE=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr .. && make install -j4
 # --- end of PCL
 
 # --- Serial lib ---
 COPY ./pkgs/serial-foxy.zip /tmp
-RUN bin/bash -c "cd /tmp && unzip serial-foxy.zip && source /opt/ros/humble/setup.bash && cd serial-foxy && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .. && make install -j$(nproc)"
+RUN bin/bash -c "cd /tmp && unzip serial-foxy.zip && source /opt/ros/jazzy/setup.bash && cd serial-foxy && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .. && make install -j$(nproc)"
 
 RUN apt update
 
@@ -66,7 +66,10 @@ RUN apt install -y libopencv-dev python3-opencv
 RUN apt install -y python3-colcon-common-extensions
 
 #gst
-RUN apt install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
+RUN apt install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-pulseaudio
+
+# Qt6 for RViz plugins
+RUN apt install -y qt6-base-dev
 
 # fix map tool
 RUN apt install -y libfreeimage-dev
@@ -75,7 +78,7 @@ RUN apt install -y libfreeimage-dev
 RUN apt install -y gdb
 
 #install apriltag
-RUN apt install -y ros-humble-apriltag-msgs
+RUN apt install -y ros-jazzy-apriltag-msgs
 RUN cd /tmp && git clone https://github.com/AprilRobotics/apriltag.git && cd apriltag && git checkout 3806edf38ac4400153677e510c9f9dcb81f472c8 && cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --target install
 
 #install can stuff for scout

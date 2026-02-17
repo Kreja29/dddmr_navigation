@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 
 project(dddmr_rviz_default_plugins)
 
@@ -22,15 +22,15 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 
+find_package(Qt6 REQUIRED COMPONENTS Widgets Test)
+
 find_package(rviz_common REQUIRED)
 find_package(rviz_rendering REQUIRED)
 find_package(rviz_ogre_vendor REQUIRED)
 
-find_package(Qt5 REQUIRED COMPONENTS Widgets Test)
-
 find_package(geometry_msgs REQUIRED)
 
-find_package(ignition-math6 REQUIRED)
+find_package(gz-math7 REQUIRED)
 
 find_package(image_transport REQUIRED)
 find_package(interactive_markers REQUIRED)
@@ -50,12 +50,7 @@ find_package(pcl_conversions REQUIRED)
 
 find_package(PCL REQUIRED COMPONENTS filters common io)
 if(NOT "${PCL_LIBRARIES}" STREQUAL "")
-  # This package fails to build on Debian Stretch with a linking error against
-  # 'Qt5::Widgets'.  This is a transitive dependency that comes in to PCL via
-  # the PCL dependency on VTK.  However, we don't actually care about the Qt
-  # dependencies for this package, so just remove them.  This is similar to the
-  # workaround in https://github.com/ros-perception/perception_pcl/pull/151,
-  # and can be removed when Stretch goes out of support.
+  # Remove VTK Qt dependencies that conflict with our Qt6 usage.
   list(REMOVE_ITEM PCL_LIBRARIES
     "vtkGUISupportQt"
     "vtkGUISupportQtOpenGL"
@@ -63,6 +58,11 @@ if(NOT "${PCL_LIBRARIES}" STREQUAL "")
     "vtkGUISupportQtWebkit"
     "vtkViewsQt"
     "vtkRenderingQt")
+endif()
+# PCL/VTK may pull in Qt5 targets that conflict with Qt6. Remove them.
+if(TARGET Qt5::Core)
+  set_target_properties(Qt5::Core PROPERTIES INTERFACE_QT_MAJOR_VERSION "")
+  set_target_properties(Qt5::Core PROPERTIES INTERFACE_LINK_LIBRARIES "")
 endif()
 
 include_directories(
@@ -79,7 +79,7 @@ set(dddmr_rviz_default_plugins_headers_to_moc
 )
 
 foreach(header "${dddmr_rviz_default_plugins_headers_to_moc}")
-  qt5_wrap_cpp(dddmr_rviz_default_plugins_moc_files "${header}")
+  qt6_wrap_cpp(dddmr_rviz_default_plugins_moc_files "${header}")
 endforeach()
 
 set(dddmr_rviz_default_plugins_source_files
@@ -100,17 +100,17 @@ add_library(dddmr_rviz_default_plugins SHARED
 target_include_directories(dddmr_rviz_default_plugins PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
-  ${Qt5Widgets_INCLUDE_DIRS}
 )
 
 target_link_libraries(dddmr_rviz_default_plugins PUBLIC
   rviz_ogre_vendor::OgreMain
   rviz_ogre_vendor::OgreOverlay
+  Qt6::Widgets
   ${PCL_LIBRARIES}
 )
 
 target_link_libraries(dddmr_rviz_default_plugins PRIVATE
-  ignition-math6
+  gz-math7::gz-math7
 )
 
 # Causes the visibility macros to use dllexport rather than dllimport,

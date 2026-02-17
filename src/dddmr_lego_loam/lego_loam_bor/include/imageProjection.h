@@ -16,7 +16,7 @@
 #include "tf2_ros/static_transform_broadcaster.h"
 
 // ros
-#include <cv_bridge/cv_bridge.h>
+#include <cv_bridge/cv_bridge.hpp>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>

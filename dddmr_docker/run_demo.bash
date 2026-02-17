@@ -18,7 +18,7 @@ if [ "$is_cuda" != "" ] ;then
         --volume="/tmp:/tmp" \
         --volume="${HOME}/dddmr_bags:/root/dddmr_bags" \
         --volume="${HOME}/dddmr_navigation:/root/dddmr_navigation" \
-        --name="dddmr_humble_dev" \
+        --name="dddmr_jazzy_dev" \
         dddmr:cuda
 elif [ "$is_x64" != "" ] ;then 
     docker run -it \
@@ -30,7 +30,7 @@ elif [ "$is_x64" != "" ] ;then
         --volume="/tmp:/tmp" \
         --volume="${HOME}/dddmr_bags:/root/dddmr_bags" \
         --volume="${HOME}/dddmr_navigation:/root/dddmr_navigation" \
-        --name="dddmr_humble_dev" \
+        --name="dddmr_jazzy_dev" \
         dddmr:x64
 elif [ "$is_l4t_r36" != "" ] ;then 
     docker run -it \
@@ -45,7 +45,7 @@ elif [ "$is_l4t_r36" != "" ] ;then
         --volume="/tmp:/tmp" \
         --volume="${HOME}/dddmr_bags:/root/dddmr_bags" \
         --volume="${HOME}/dddmr_navigation:/root/dddmr_navigation" \
-        --name="dddmr_humble_dev" \
+        --name="dddmr_jazzy_dev" \
         dddmr:l4t_r36
 fi
 

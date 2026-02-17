@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 
 project(map_editor_panel LANGUAGES CXX)
 
@@ -17,11 +17,10 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rviz_ogre_vendor REQUIRED)
-find_package(Qt5 REQUIRED COMPONENTS Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(rviz_assimp_vendor REQUIRED)
 find_package(rviz_rendering REQUIRED)
 find_package(rviz_common REQUIRED)
 
@@ -59,7 +58,7 @@ set(${PROJECT_NAME}_headers_to_moc
         )
 
 foreach(header "${${PROJECT_NAME}_headers_to_moc}")
-    qt5_wrap_cpp(${PROJECT_NAME}_moc_files "${header}")
+    qt6_wrap_cpp(${PROJECT_NAME}_moc_files "${header}")
 endforeach()
 
 set(${PROJECT_NAME}_source_files
@@ -81,7 +80,7 @@ target_link_libraries(${PROJECT_NAME}
         PUBLIC
         rviz_ogre_vendor::OgreMain
         rviz_ogre_vendor::OgreOverlay
-        Qt5::Widgets
+        Qt6::Widgets
         ${PCL_LIBRARIES}
         )
 
@@ -89,7 +88,6 @@ ament_target_dependencies(${PROJECT_NAME}
         PUBLIC
         pluginlib
         rclcpp
-        rviz_assimp_vendor
         rviz_rendering
         rviz_common
         sensor_msgs
@@ -99,9 +97,6 @@ ament_target_dependencies(${PROJECT_NAME}
 # Causes the visibility macros to use dllexport rather than dllimport,
 # which is appropriate when building the dll but not consuming it.
 target_compile_definitions(${PROJECT_NAME} PRIVATE "RVIZ_DEFAULT_PLUGINS_BUILDING_LIBRARY")
-
-# prevent pluginlib from using boost
-target_compile_definitions(${PROJECT_NAME} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 
 pluginlib_export_plugin_description_file(rviz_common plugin_description.xml)
 

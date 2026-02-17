@@ -31,7 +31,7 @@ cd ~/dddmr_navigation/dddmr_docker && ./run_demo.bash
 ```
 #### Play odom_3d_example using bag files in docker container
 ```
-cd ~/dddmr_navigation && source /opt/ros/humble/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+cd ~/dddmr_navigation && source /opt/ros/jazzy/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 source install/setup.bash
 ros2 launch dddmr_odom_3d example_odom_3d_launch.py
 ```

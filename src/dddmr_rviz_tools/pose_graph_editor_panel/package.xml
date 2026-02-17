@@ -9,13 +9,12 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <build_depend>qtbase5-dev</build_depend>
-  <build_depend>qt5-qmake</build_depend>
-  <exec_depend>libqt5-core</exec_depend>
+  <build_depend>qt6-base-dev</build_depend>
+  <exec_depend>libqt6core6</exec_depend>
 
   <depend>rclcpp</depend>
   <depend>rviz_common</depend>
-  <depend>libqt5-widgets</depend>
+  <depend>libqt6widgets6</depend>
   <depend>rviz2</depend>
 
   <test_depend>ament_lint_auto</test_depend>

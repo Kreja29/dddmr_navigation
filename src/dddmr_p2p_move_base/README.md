@@ -32,14 +32,14 @@ cd ~/dddmr_navigation/src/dddmr_mcl_3dl && ./download_files.bash
 ```
 #### Launch p2p move base
 ```
-cd ~/dddmr_navigation && source /opt/ros/humble/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+cd ~/dddmr_navigation && source /opt/ros/jazzy/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 source install/setup.bash
 ros2 launch p2p_move_base p2p_move_base_localization.launch
 ```
 #### Play bag file in the container
 We need another terminal to play the bag file. Open another terminal and run following command to get into the container:
 ```
-docker exec -it dddmr_humble_dev bash
+docker exec -it dddmr_jazzy_dev bash
 ```
 Once you are in the container, run:
 ```

@@ -48,7 +48,7 @@ cd /root/dddmr_navigation/src/dddmr_semantic_segmentation/model
 #### 4. Compile and Run
 ```
 cd /root/dddmr_navigation
-source /opt/ros/humble/install/setup.bash
+source /opt/ros/jazzy/install/setup.bash
 colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 source install/setup.bash
 ros2 launch dddmr_semantic_segmentation rs_semantic_segmentaton_trt_launch.py

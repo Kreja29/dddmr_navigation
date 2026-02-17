@@ -31,7 +31,7 @@ cd ~/dddmr_navigation/dddmr_docker && ./run_demo.bash
 ```
 #### Launch global planner
 ```
-cd ~/dddmr_navigation && source /opt/ros/humble/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+cd ~/dddmr_navigation && source /opt/ros/jazzy/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 source install/setup.bash
 ros2 launch global_planner path_planning_on_static_layer.launch
 ```

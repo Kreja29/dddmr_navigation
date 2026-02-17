@@ -9,7 +9,7 @@ The original authors deserve all the credits, we just stand on the shoulders of 
 
 The following features are provided and are different from original version:
 
-- ROS2 version (Humble) of LeGO LOAM BOR, support online and offline(bag) mapping, IMU/Odometry is optional.
+- ROS2 version (Jazzy) of LeGO LOAM BOR, support online and offline(bag) mapping, IMU/Odometry is optional.
 - Interactive mapping. Users can pause and resume mapping during bag playing, and change parameters accordingly.
 - Pose graph visualization.
 - Conditional loop closure mechanism for a more stable mapping result.
@@ -99,7 +99,7 @@ cd ~/dddmr_navigation/dddmr_docker && ./run_demo.bash
 ```
 #### Play mapping using bag files in docker container
 ```
-cd ~/dddmr_navigation && source /opt/ros/humble/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+cd ~/dddmr_navigation && source /opt/ros/jazzy/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 source install/setup.bash
 ros2 launch lego_loam_bor lego_loam_bag.launch
 ```
@@ -117,7 +117,7 @@ In the Rviz2, click resume to start mapping, and change the parameter accordingl
 # Pose Graph Editor Tutorial
 #### Play pose graph editor in docker container
 ```
-cd ~/dddmr_navigation && source /opt/ros/humble/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+cd ~/dddmr_navigation && source /opt/ros/jazzy/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 source install/setup.bash
 ros2 launch lego_loam_bor pose_graph_editor.launch
 ```

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 project(p2p_move_base)
 
 find_package(ament_cmake REQUIRED)

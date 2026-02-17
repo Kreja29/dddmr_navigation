@@ -5,6 +5,6 @@ We have docker files that can generate:
 - ubuntu 22.04 on nvidia/l4t-jetpack:r36.4.0
 
 The docker images are built with:
-- ROS2 humble
+- ROS2 jazzy
 - pcl-1.15
 - gtsam 4.2a9

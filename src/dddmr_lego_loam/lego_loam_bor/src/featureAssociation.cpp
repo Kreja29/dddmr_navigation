@@ -114,7 +114,7 @@ FeatureAssociation::FeatureAssociation(std::string name, Channel<ProjectionOut> 
 
 FeatureAssociation::~FeatureAssociation()
 {
-  _input_channel.send({});
+  _input_channel.send(ProjectionOut{});
 }
 
 void FeatureAssociation::initializeValue() {

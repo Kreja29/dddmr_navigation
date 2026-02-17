@@ -37,7 +37,7 @@ cd ~/dddmr_navigation/src/dddmr_beginner_guide && ./run_x64_gazebo.bash
 ```
 - ##### Step 2 (inside the gazebo container): build and launch
 ```
-source /opt/ros/humble/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+source /opt/ros/jazzy/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 source install/setup.bash && ros2 launch go2_config gz_lidar_odom.launch.py
 ```
 
@@ -49,7 +49,7 @@ cd ~/dddmr_navigation/src/dddmr_beginner_guide && ./run_x64_navigation.bash
 ```
    - ##### Step 2 (inside the navigation container): build and launch
 ```
-cd dddmr_navigation/ && source /opt/ros/humble/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+cd dddmr_navigation/ && source /opt/ros/jazzy/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 source install/setup.bash && ros2 launch p2p_move_base go2_localization.launch
 ```
 

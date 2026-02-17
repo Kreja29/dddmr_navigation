@@ -22,7 +22,7 @@ if [ "$is_cuda" != "" ] ;then
         --volume="/dev:/dev" \
         --volume="${HOME}/dddmr_bags:/root/dddmr_bags" \
         --volume="${HOME}/dddmr_navigation:/root/dddmr_navigation" \
-        --name="dddmr_humble_cuda_dev" \
+        --name="dddmr_jazzy_cuda_dev" \
         dddmr:cuda
 elif [ "$is_l4t_r36" != "" ] ;then 
     echo "Detect image of dddmr:l4t_r36"
@@ -41,6 +41,6 @@ elif [ "$is_l4t_r36" != "" ] ;then
         --volume="/tmp:/tmp" \
         --volume="${HOME}/dddmr_bags:/root/dddmr_bags" \
         --volume="${HOME}/dddmr_navigation:/root/dddmr_navigation" \
-        --name="dddmr_humble_l4t_dev" \
+        --name="dddmr_jazzy_l4t_dev" \
         dddmr:l4t_r36
 fi

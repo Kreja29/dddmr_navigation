@@ -51,7 +51,7 @@ cd ~/dddmr_navigation/dddmr_docker && ./run_demo.bash
 ##### Launch everything in the container
 The bag file will be auto-played after 3 seconds when launching.
 ```
-cd ~/dddmr_navigation && source /opt/ros/humble/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+cd ~/dddmr_navigation && source /opt/ros/jazzy/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 source install/setup.bash
 ros2 launch perception_3d multilayer_spinning_lidar_3d_ros_launch.py
 ```
@@ -87,7 +87,7 @@ cd ~/dddmr_navigation/dddmr_docker && ./run_demo.bash
 ##### Launch everything in the container
 The bag file will be auto-played after 3 seconds when launching.
 ```
-cd ~/dddmr_navigation && source /opt/ros/humble/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+cd ~/dddmr_navigation && source /opt/ros/jazzy/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 source install/setup.bash
 ros2 launch perception_3d multi_depth_camera_3d_ros_launch.py
 ```
@@ -123,7 +123,7 @@ cd ~/dddmr_navigation/dddmr_docker && ./run_demo.bash
 ##### Launch everything in the container
 The bag file will be auto-played after 3 seconds when launching.
 ```
-cd ~/dddmr_navigation && source /opt/ros/humble/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+cd ~/dddmr_navigation && source /opt/ros/jazzy/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 source install/setup.bash
 ros2 launch perception_3d scanning_lidar_3d_ros_launch.py
 ```

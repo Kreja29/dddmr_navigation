@@ -57,14 +57,14 @@ cd ~/dddmr_navigation/dddmr_docker && ./run_demo.bash
 ```
 ##### 1. Launch everything in the container
 ```
-cd ~/dddmr_navigation && source /opt/ros/humble/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+cd ~/dddmr_navigation && source /opt/ros/jazzy/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 source install/setup.bash
 ros2 launch mcl_3dl mcl_3dlXfeatureXbag.launch
 ```
 ##### 2. Play bag file in the container
 We need another terminal to play the bag file. Open another terminal and run following command to get into the container:
 ```
-docker exec -it dddmr_humble_dev bash
+docker exec -it dddmr_jazzy_dev bash
 ```
 Once you are in the container, run:
 ```
