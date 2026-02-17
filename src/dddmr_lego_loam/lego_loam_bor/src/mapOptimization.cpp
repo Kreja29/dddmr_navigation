@@ -280,7 +280,7 @@ void MapOptimization::pcdSaver(const std::shared_ptr<std_srvs::srv::Empty::Reque
 
 MapOptimization::~MapOptimization()
 {
-  _input_channel.send(AssociationOut{});
+  _input_channel.send(AssociationOut());
 }
 
 
