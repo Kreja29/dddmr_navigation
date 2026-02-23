@@ -25,6 +25,9 @@ find_package(rviz_rendering REQUIRED)
 find_package(rviz_common REQUIRED)
 
 find_package(MPI QUIET)
+if(NOT TARGET MPI::MPI_C)
+  add_library(MPI::MPI_C INTERFACE IMPORTED GLOBAL)
+endif()
 find_package(sensor_msgs REQUIRED)
 find_package(pcl_conversions REQUIRED)
 
