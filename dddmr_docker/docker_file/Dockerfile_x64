@@ -87,6 +87,9 @@ RUN cd /tmp && git clone https://github.com/AprilRobotics/apriltag.git && cd apr
 #install can stuff for scout
 RUN apt install -y libasio-dev can-utils
 
+RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc && \
+    echo "source /root/dddmr_navigation/install/setup.bash" >> /root/.bashrc
+
 WORKDIR /root
 
 CMD ["bash"]

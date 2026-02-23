@@ -5,8 +5,8 @@ xhost +local:docker
 is_x64=$(docker image ls dddmr | grep x64)
 is_cuda=$(docker image ls dddmr | grep cuda)
 is_l4t_r36=$(docker image ls dddmr | grep l4t_r36)
-if [ "$is_cuda" != "" ] ;then 
-    docker run -it \
+if [ "$is_cuda" != "" ] ;then
+    docker run -it --rm \
         --privileged \
         --network=host \
         --gpus=all \
@@ -21,7 +21,7 @@ if [ "$is_cuda" != "" ] ;then
         --name="dddmr_jazzy_dev" \
         dddmr:cuda
 elif [ "$is_x64" != "" ] ;then
-    docker run -it \
+    docker run -it --rm \
         --privileged \
         --network=host \
         --env="DISPLAY" \
@@ -34,8 +34,8 @@ elif [ "$is_x64" != "" ] ;then
         --volume="${HOME}/dddmr_navigation:/root/dddmr_navigation" \
         --name="dddmr_jazzy_dev" \
         dddmr:x64
-elif [ "$is_l4t_r36" != "" ] ;then 
-    docker run -it \
+elif [ "$is_l4t_r36" != "" ] ;then
+    docker run -it --rm \
         --privileged \
         --network=host \
         --runtime=nvidia\
