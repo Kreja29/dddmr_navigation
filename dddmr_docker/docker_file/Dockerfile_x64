@@ -26,7 +26,7 @@ RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/r
 
 RUN apt-get update && apt-get install -y git
 
-RUN apt install -y ros-jazzy-desktop
+RUN apt install -y ros-jazzy-desktop ros-jazzy-rmw-cyclonedds-cpp
 # --- Jazzy has been installed
 
 

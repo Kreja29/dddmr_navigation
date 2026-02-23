@@ -1,0 +1,18 @@
+services:
+  dddmr_robot:
+    image: dddmr:x64
+    container_name: dddmr_jazzy_robot
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+    ipc: host
+    env_file:
+      - config/net_robot.env
+    volumes:
+      - /dev:/dev
+      - /tmp:/tmp
+      - ${HOME}/dddmr_bags:/root/dddmr_bags
+      - ${HOME}/dddmr_navigation:/root/dddmr_navigation
+    stdin_open: true
+    tty: true
+    command: bash

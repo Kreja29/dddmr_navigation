@@ -1,0 +1,23 @@
+services:
+  dddmr_laptop:
+    image: dddmr:x64
+    container_name: dddmr_jazzy_laptop
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+    ipc: host
+    env_file:
+      - config/net_laptop.env
+    environment:
+      - DISPLAY
+      - QT_X11_NO_MITSHM=1
+      - XAUTHORITY=/root/.Xauthority
+    volumes:
+      - /dev:/dev
+      - /tmp:/tmp
+      - ${HOME}/.Xauthority:/root/.Xauthority:ro
+      - ${HOME}/dddmr_bags:/root/dddmr_bags
+      - ${HOME}/dddmr_navigation:/root/dddmr_navigation
+    stdin_open: true
+    tty: true
+    command: bash
