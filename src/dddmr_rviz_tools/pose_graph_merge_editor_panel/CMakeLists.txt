@@ -17,7 +17,7 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rviz_ogre_vendor REQUIRED)
-find_package(Qt6 REQUIRED COMPONENTS Widgets)
+find_package(Qt5 REQUIRED COMPONENTS Widgets)
 
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -33,7 +33,7 @@ set(${PROJECT_NAME}_headers_to_moc
         )
 
 foreach(header "${${PROJECT_NAME}_headers_to_moc}")
-    qt6_wrap_cpp(${PROJECT_NAME}_moc_files "${header}")
+    qt5_wrap_cpp(${PROJECT_NAME}_moc_files "${header}")
 endforeach()
 
 set(${PROJECT_NAME}_source_files
@@ -55,7 +55,7 @@ target_link_libraries(${PROJECT_NAME}
         PUBLIC
         rviz_ogre_vendor::OgreMain
         rviz_ogre_vendor::OgreOverlay
-        Qt6::Widgets
+        Qt5::Widgets
         )
 
 ament_target_dependencies(${PROJECT_NAME}

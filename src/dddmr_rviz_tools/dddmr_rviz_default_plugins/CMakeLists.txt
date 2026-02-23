@@ -22,7 +22,7 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets Test)
+find_package(Qt5 REQUIRED COMPONENTS Widgets Test)
 
 find_package(rviz_common REQUIRED)
 find_package(rviz_rendering REQUIRED)
@@ -45,12 +45,13 @@ find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(urdf REQUIRED)
+find_package(MPI QUIET)
 find_package(visualization_msgs REQUIRED)
 find_package(pcl_conversions REQUIRED)
 
 find_package(PCL REQUIRED COMPONENTS filters common io)
 if(NOT "${PCL_LIBRARIES}" STREQUAL "")
-  # Remove VTK Qt dependencies that conflict with our Qt6 usage.
+  # Remove VTK Qt dependencies that can conflict with our Qt5 usage.
   list(REMOVE_ITEM PCL_LIBRARIES
     "vtkGUISupportQt"
     "vtkGUISupportQtOpenGL"
@@ -58,11 +59,6 @@ if(NOT "${PCL_LIBRARIES}" STREQUAL "")
     "vtkGUISupportQtWebkit"
     "vtkViewsQt"
     "vtkRenderingQt")
-endif()
-# PCL/VTK may pull in Qt5 targets that conflict with Qt6. Remove them.
-if(TARGET Qt5::Core)
-  set_target_properties(Qt5::Core PROPERTIES INTERFACE_QT_MAJOR_VERSION "")
-  set_target_properties(Qt5::Core PROPERTIES INTERFACE_LINK_LIBRARIES "")
 endif()
 
 include_directories(
@@ -79,7 +75,7 @@ set(dddmr_rviz_default_plugins_headers_to_moc
 )
 
 foreach(header "${dddmr_rviz_default_plugins_headers_to_moc}")
-  qt6_wrap_cpp(dddmr_rviz_default_plugins_moc_files "${header}")
+  qt5_wrap_cpp(dddmr_rviz_default_plugins_moc_files "${header}")
 endforeach()
 
 set(dddmr_rviz_default_plugins_source_files
@@ -105,7 +101,7 @@ target_include_directories(dddmr_rviz_default_plugins PUBLIC
 target_link_libraries(dddmr_rviz_default_plugins PUBLIC
   rviz_ogre_vendor::OgreMain
   rviz_ogre_vendor::OgreOverlay
-  Qt6::Widgets
+  Qt5::Widgets
   ${PCL_LIBRARIES}
 )
 

@@ -20,14 +20,16 @@ if [ "$is_cuda" != "" ] ;then
         --volume="${HOME}/dddmr_navigation:/root/dddmr_navigation" \
         --name="dddmr_jazzy_dev" \
         dddmr:cuda
-elif [ "$is_x64" != "" ] ;then 
+elif [ "$is_x64" != "" ] ;then
     docker run -it \
         --privileged \
         --network=host \
         --env="DISPLAY" \
         --env="QT_X11_NO_MITSHM=1" \
+        --env="XAUTHORITY=/root/.Xauthority" \
         --volume="/dev:/dev" \
         --volume="/tmp:/tmp" \
+        --volume="${HOME}/.Xauthority:/root/.Xauthority:ro" \
         --volume="${HOME}/dddmr_bags:/root/dddmr_bags" \
         --volume="${HOME}/dddmr_navigation:/root/dddmr_navigation" \
         --name="dddmr_jazzy_dev" \
