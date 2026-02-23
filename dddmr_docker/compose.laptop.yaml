@@ -20,4 +20,7 @@ services:
       - ${HOME}/dddmr_navigation:/root/dddmr_navigation
     stdin_open: true
     tty: true
-    command: bash
+    command: >
+      bash -c "source /opt/ros/jazzy/setup.bash &&
+               source /root/dddmr_navigation/install/setup.bash &&
+               ros2 run rviz2 rviz2 -d /root/dddmr_navigation/src/dddmr_lego_loam/lego_loam_bor/rviz/lego_loam.rviz"

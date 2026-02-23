@@ -15,4 +15,7 @@ services:
       - ${HOME}/dddmr_navigation:/root/dddmr_navigation
     stdin_open: true
     tty: true
-    command: bash
+    command: >
+      bash -c "source /opt/ros/jazzy/setup.bash &&
+               source /root/dddmr_navigation/install/setup.bash &&
+               ros2 launch lego_loam_bor lego_loam_bag.launch use_rviz:=false"
