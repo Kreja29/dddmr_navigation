@@ -21,6 +21,8 @@ services:
     stdin_open: true
     tty: true
     command: >
-      bash -c "source /opt/ros/jazzy/setup.bash &&
+      bash -c "sysctl -w net.core.rmem_max=2147483647 &&
+               sysctl -w net.core.rmem_default=2147483647 &&
+               source /opt/ros/jazzy/setup.bash &&
                source /root/dddmr_navigation/install/setup.bash &&
                ros2 run rviz2 rviz2 -d /root/dddmr_navigation/src/dddmr_lego_loam/lego_loam_bor/rviz/lego_loam.rviz"

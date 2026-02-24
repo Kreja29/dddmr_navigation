@@ -27,7 +27,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: Map
+    SyncSource: ""
   - Class: mapping_panel/MappingPanel
     Name: MappingPanel
   - Class: pose_graph_editor_panel/PoseGraphEditorPanel
