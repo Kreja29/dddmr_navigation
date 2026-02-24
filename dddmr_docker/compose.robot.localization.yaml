@@ -1,0 +1,23 @@
+services:
+  dddmr_robot:
+    image: dddmr:x64
+    container_name: dddmr_jazzy_robot
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+    ipc: host
+    env_file:
+      - config/net_robot.env
+    volumes:
+      - /dev:/dev
+      - /tmp:/tmp
+      - ${HOME}/dddmr_bags:/root/dddmr_bags
+      - ${HOME}/dddmr_navigation:/root/dddmr_navigation
+    stdin_open: true
+    tty: true
+    command: >
+      bash -c "sysctl -w net.core.rmem_max=2147483647 &&
+               sysctl -w net.core.rmem_default=2147483647 &&
+               source /opt/ros/jazzy/setup.bash &&
+               source /root/dddmr_navigation/install/setup.bash &&
+               ros2 launch p2p_move_base p2p_move_base_localization_headless.launch"

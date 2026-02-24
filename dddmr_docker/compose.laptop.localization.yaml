@@ -1,0 +1,28 @@
+services:
+  dddmr_laptop:
+    image: dddmr:x64
+    container_name: dddmr_jazzy_laptop
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+    ipc: host
+    env_file:
+      - config/net_laptop.env
+    environment:
+      - DISPLAY
+      - QT_X11_NO_MITSHM=1
+      - XAUTHORITY=/root/.Xauthority
+    volumes:
+      - /dev:/dev
+      - /tmp:/tmp
+      - ${HOME}/.Xauthority:/root/.Xauthority:ro
+      - ${HOME}/dddmr_bags:/root/dddmr_bags
+      - ${HOME}/dddmr_navigation:/root/dddmr_navigation
+    stdin_open: true
+    tty: true
+    command: >
+      bash -c "sysctl -w net.core.rmem_max=2147483647 &&
+               sysctl -w net.core.rmem_default=2147483647 &&
+               source /opt/ros/jazzy/setup.bash &&
+               source /root/dddmr_navigation/install/setup.bash &&
+               ros2 run rviz2 rviz2 -d /root/dddmr_navigation/src/dddmr_p2p_move_base/rviz/p2p_move_base_localization.rviz"
