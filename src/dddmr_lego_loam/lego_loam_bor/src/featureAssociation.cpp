@@ -1511,7 +1511,7 @@ void FeatureAssociation::runFeatureAssociation() {
   cloudHeader = segInfo.header;
   cloudHeader.stamp = clock_->now();
   trans_c2s_ = projection.trans_c2s;
-  baselink_frame_ = "base_link";
+  baselink_frame_ = projection.baselink_frame;
   tf2_trans_b2s_.setOrigin(tf2::Vector3(projection.trans_b2s.transform.translation.x, 
                               projection.trans_b2s.transform.translation.y, projection.trans_b2s.transform.translation.z));
   tf2_trans_b2s_.setRotation(tf2::Quaternion(projection.trans_b2s.transform.rotation.x, 

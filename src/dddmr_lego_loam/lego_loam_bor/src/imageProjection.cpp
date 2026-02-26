@@ -45,7 +45,7 @@ ImageProjection::ImageProjection(std::string name, Channel<ProjectionOut>& outpu
   _pub_projected_image = this->create_publisher<sensor_msgs::msg::Image>("projected_image", 1);
 
   _sub_laser_cloud = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-        "lslidar_point_cloud", 2,
+        "lslidar_point_cloud", rclcpp::SensorDataQoS(),
         std::bind(&ImageProjection::cloudHandler, this, std::placeholders::_1));
 
   _pub_full_info_cloud = this->create_publisher<sensor_msgs::msg::PointCloud2>
@@ -1072,6 +1072,7 @@ void ImageProjection::publishClouds() {
   out.trans_b2s = trans_b2s_;
   out.trans_m2ci = trans_m2ci_;
   out.odom_type = odom_type_;
+  out.baselink_frame = baselink_frame_;
   out.vertical_scans = _vertical_scans;
   out.horizontal_scans = _horizontal_scans;
   out.scan_period = _scan_period;

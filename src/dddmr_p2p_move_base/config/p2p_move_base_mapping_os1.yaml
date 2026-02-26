@@ -152,9 +152,10 @@ perception_3d_local:
     map:
       plugin: "perception_3d::StaticLayer"
       is_local_planner: true
-      mapping_mode: true
       map_topic: "lego_loam_map"
       ground_topic: "lego_loam_ground"
+      support:
+        mapping_mode: true
     path_blocked_strategy:
       plugin: "perception_3d::PathBlockedStrategy"
       check_radius: 0.3
