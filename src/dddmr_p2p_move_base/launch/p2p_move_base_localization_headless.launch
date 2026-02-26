@@ -16,6 +16,7 @@
 
   <node pkg="p2p_move_base" exec="p2p_move_base_node" output="screen" respawn="false">
     <param from="$(find-pkg-share p2p_move_base)/config/p2p_move_base_localization_os1.yaml" />
+    <remap from="cmd_vel" to="/lynx/cmd_vel"/>
   </node>
   <node pkg="p2p_move_base" exec="clicked2goal.py" output="screen" respawn="false"/>
 

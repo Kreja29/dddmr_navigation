@@ -8,6 +8,8 @@ p2p_move_base:
     controller_patience: 10.0
     no_plan_retry_num: 10
     waiting_patience: 10.0
+    use_twist_stamped: true
+    twist_frame_id: "lynx/base_link"
 global_plan_manager:
   ros__parameters:
     global_planner_action_name: "get_plan"
@@ -77,7 +79,7 @@ trajectory_generators:
 
     differential_drive_simple:
       plugin: "trajectory_generators::DDSimpleTrajectoryGeneratorTheory"
-      max_vel_x: 1.0
+      max_vel_x: 0.5
       min_vel_x: 0.1 #0.1 This value should not be negative, because we want to customize backward behavior
       max_vel_theta: 0.6
       min_vel_theta: 0.15
@@ -163,7 +165,7 @@ perception_3d_local:
       plugin: "perception_3d::MultiLayerSpinningLidar"
       is_local_planner: true
       topic: "segmented_cloud_pure"
-      pub_gbl_marking_for_visualization: false
+      pub_gbl_marking_for_visualization: true
       vertical_FOV_top: 22.5
       vertical_FOV_bottom: -22.5
       scan_effective_positive_start: 30.0
@@ -172,7 +174,7 @@ perception_3d_local:
       scan_effective_negative_end: -180.0
       xy_resolution: 0.05
       height_resolution: 0.05
-      marking_height: 2.0
+      marking_height: 0.7
       perception_window_size: 3.0 #the window for marking/clearing in meter, we dont casting to maximum range of the sensor even it is gbl map
       segmentation_ignore_ratio: 0.5 #f a segmentation match static pc with this ratio, we ignore it. ex: a wall
       expected_sensor_time: 0.2

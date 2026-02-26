@@ -8,6 +8,8 @@ p2p_move_base:
     controller_patience: 10.0
     no_plan_retry_num: 10
     waiting_patience: 10.0
+    use_twist_stamped: true
+    twist_frame_id: "lynx/base_link"
 global_plan_manager:
   ros__parameters:
     global_planner_action_name: "get_dwa_plan"
@@ -193,7 +195,7 @@ trajectory_generators:
 
     differential_drive_simple:
       plugin: "trajectory_generators::DDSimpleTrajectoryGeneratorTheory"
-      max_vel_x: 1.0
+      max_vel_x: 0.5
       min_vel_x: 0.1 #0.1 This value should not be negative, because we want to customize backward behavior
       max_vel_theta: 0.6
       min_vel_theta: 0.15
